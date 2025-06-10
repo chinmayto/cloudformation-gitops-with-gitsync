@@ -7,7 +7,7 @@ Parameters:
     Default: 'GitHub-to-CloudFormation'
   S3BucketPrefixName:
     Type: String
-    Default: 'cf-app-files'
+    Default: 'chinmay-cf-app-files'
 
 Resources:
   GitHubConnection:
