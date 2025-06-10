@@ -1,0 +1,8 @@
+template-file-path: './infrastructure/development/s3bucket.yaml'
+
+parameters:
+  S3BucketPrefixName: 'S3BucketPrefixName' # specify ssm parameter name
+  Environment: 'dev'
+
+tags:
+  InfraDeploymentProcess: 'cf stack with git sync option for dev env'

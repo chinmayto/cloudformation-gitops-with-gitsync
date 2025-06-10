@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Connect GitHub repository with AWS'
+
+Parameters:
+  ConnectionName:
+    Type: String
+    Default: 'GitHub-to-CloudFormation'
+  S3BucketPrefixName:
+    Type: String
+    Default: 'cf-app-files'
+
+Resources:
+  GitHubConnection:
+    Type: 'AWS::CodeStarConnections::Connection'
+    Properties:
+      ConnectionName: !Ref ConnectionName
+      ProviderType: 'GitHub'
+
+  CloudFormationS3AccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CloudFormationS3AccessRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - cloudformation.amazonaws.com
+            Action: 
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: CloudFormationS3ManagementPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:CreateBucket
+                  - s3:DeleteBucket
+                  - s3:PutBucketPolicy
+                  - s3:GetBucketPolicy
+                  - s3:ListBucket
+                  - s3:PutBucketTagging
+                  - s3:PutBucketPolicy
+                  - s3:DeleteBucketPolicy
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - cloudformation:*
+                Resource: '*'
+
+  GitSyncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CFNGitSyncRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: CfnGitSyncTrustPolicy
+            Effect: Allow
+            Principal:
+              Service: cloudformation.sync.codeconnections.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: GitSyncPermissions
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SyncToCloudFormation
+                Effect: Allow
+                Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStacks
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:GetTemplate
+                  - cloudformation:ListChangeSets
+                  - cloudformation:ListStacks
+                  - cloudformation:ValidateTemplate
+                Resource: '*'
+              - Sid: PolicyForManagedRules
+                Effect: Allow
+                Action:
+                  - events:PutRule
+                  - events:PutTargets
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    events:ManagedBy: cloudformation.sync.codeconnections.amazonaws.com
+              - Sid: PolicyForDescribingRule
+                Effect: Allow
+                Action: events:DescribeRule
+                Resource: '*'
+
+  SsmS3BucketPrefixName:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: S3BucketPrefixName
+      Type: String
+      Value: !Ref S3BucketPrefixName
+      Description: "Prefix of the S3 bucket name for git sync cf stacks"
