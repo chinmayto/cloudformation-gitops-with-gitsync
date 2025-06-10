@@ -36,7 +36,7 @@ Resources:
         - Key: Name
           Value:
             !Sub
-              - '${S3BucketPrefixName}-${UsedEnvironmentLabel}'
+              - '${S3BucketPrefixName}-${UsedEnvironmentLabel}-chinmay'
               - UsedEnvironmentLabel: !FindInMap [ EnvironmentLabel, !Ref Environment, label ]
         - Key: Environment
           Value: !FindInMap [ EnvironmentLabel, !Ref Environment, label ]
@@ -56,5 +56,5 @@ Resources:
               - s3:GetObject
             Resource: 
               !Sub
-                - 'arn:${AWS::Partition}:s3:::${S3BucketPrefixName}-${UsedEnvironmentLabel}/*'
+                - 'arn:${AWS::Partition}:s3:::${S3BucketPrefixName}-${UsedEnvironmentLabel}-chinmay/*'
                 - UsedEnvironmentLabel: !FindInMap [ EnvironmentLabel, !Ref Environment, label ]
