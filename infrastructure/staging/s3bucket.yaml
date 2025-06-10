@@ -30,7 +30,7 @@ Resources:
     Properties:
       BucketName:
         !Sub
-          - '${S3BucketPrefixName}-${UsedEnvironmentLabel}'
+          - '${S3BucketPrefixName}-${UsedEnvironmentLabel}-chinmay'
           - UsedEnvironmentLabel: !FindInMap [ EnvironmentLabel, !Ref Environment, label ]
       Tags:
         - Key: Name
