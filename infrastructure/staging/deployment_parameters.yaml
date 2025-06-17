@@ -1,8 +1,7 @@
-template-file-path: './infrastructure/staging/s3bucket.yaml'
+template-file-path: './infrastructure/staging/webserver.yaml'
 
 parameters:
-  S3BucketPrefixName: 'S3BucketPrefixName' # specify ssm parameter name
-  Environment: 'stag'
+  Environment: 'Staging'
 
 tags:
-  InfraDeploymentProcess: 'cf stack with git sync option for stag env'
+  InfraDeploymentProcess: 'cf stack with git sync option for staging env'

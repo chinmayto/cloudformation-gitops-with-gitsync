@@ -1,8 +1,7 @@
-template-file-path: './infrastructure/production/s3bucket.yaml'
+template-file-path: './infrastructure/production/webserver.yaml'
 
 parameters:
-  S3BucketPrefixName: 'S3BucketPrefixName' # specify ssm parameter name
-  Environment: 'prod'
+  Environment: 'Production'
 
 tags:
-  InfraDeploymentProcess: 'cf stack with git sync option for prod env'
+  InfraDeploymentProcess: 'cf stack with git sync option for production env'
