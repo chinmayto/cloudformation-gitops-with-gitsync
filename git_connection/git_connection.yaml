@@ -47,6 +47,9 @@ Resources:
                   - iam:ListRoles
                   - iam:DeleteRolePolicy
                   - iam:TagRole
+                  - iam:DeleteRole
+                  - iam:GetInstanceProfile
+                  - iam:getRolePolicy
                   - ssm:GetParameter
                   - ssm:GetParameters
                   - logs:*
