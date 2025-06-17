@@ -1,14 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Connect GitHub repository with AWS'
+Description: 'Connect GitHub repository with AWS and create roles for CloudFormation and Git Sync'
 
 Parameters:
   ConnectionName:
     Type: String
     Default: 'GitHub-to-CloudFormation'
-  S3BucketPrefixName:
-    Type: String
-    Default: 'chinmay-cf-app-files'
-
 Resources:
   GitHubConnection:
     Type: 'AWS::CodeStarConnections::Connection'
@@ -16,10 +12,10 @@ Resources:
       ConnectionName: !Ref ConnectionName
       ProviderType: 'GitHub'
 
-  CloudFormationS3AccessRole:
+  CloudFormationExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CloudFormationS3AccessRole
+      RoleName: CloudFormationExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -30,29 +26,29 @@ Resources:
             Action: 
               - sts:AssumeRole
       Policies:
-        - PolicyName: CloudFormationS3ManagementPolicy
+        - PolicyName: !Sub "CloudFormationDeploymentPolicy"
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:CreateBucket
-                  - s3:DeleteBucket
-                  - s3:PutBucketPolicy
-                  - s3:GetBucketPolicy
-                  - s3:ListBucket
-                  - s3:PutBucketTagging
-                  - s3:PutBucketPolicy
-                  - s3:DeleteBucketPolicy
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - ssm:GetParameters
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - cloudformation:*
-                Resource: '*'
+                  - ec2:*
+                  - autoscaling:*
+                  - iam:PassRole
+                  - iam:GetRole
+                  - iam:CreateInstanceProfile
+                  - iam:AddRoleToInstanceProfile
+                  - iam:RemoveRoleFromInstanceProfile
+                  - iam:DeleteInstanceProfile
+                  - iam:CreateRole
+                  - iam:PutRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:ListInstanceProfiles
+                  - iam:ListRoles
+                  - ssm:GetParameter
+                  - logs:*
+                  - cloudwatch:PutMetricData
+                Resource: "*"
 
   GitSyncRole:
     Type: AWS::IAM::Role
@@ -98,11 +94,3 @@ Resources:
                 Effect: Allow
                 Action: events:DescribeRule
                 Resource: '*'
-
-  SsmS3BucketPrefixName:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: S3BucketPrefixName
-      Type: String
-      Value: !Ref S3BucketPrefixName
-      Description: "Prefix of the S3 bucket name for git sync cf stacks"
