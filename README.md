@@ -23,6 +23,23 @@ This is GitOps natively integrated with AWS services.
 ### Architecture Overview
 In this implementation, we’re managing three separate AWS environments: Development, Staging and Production. Each environment has its own CloudFormation stack managed through GitSync. The CloudFormation templates for each environment are stored in different directories in the GitHub repository. Any update to these templates is automatically picked up and applied to the respective AWS environment.
 
+```sh
+├───git_connection
+│       cfn-delete-pipeline.sh
+│       cfn-deploy-pipeline.sh
+│       git_connection.yaml
+└───infrastructure
+    ├───development
+    │       deployment_parameters.yaml
+    │       webserver.yaml
+    ├───production
+    │       deployment_parameters.yaml
+    │       webserver.yaml
+    └───staging
+            deployment_parameters.yaml
+            webserver.yaml
+```
+
 ### Step 1: Deploy Prerequisite Components via CloudFormation
 
 `GitHubConnection` – Links AWS with your GitHub repo.
@@ -181,12 +198,12 @@ CloudFormation stack cfn-git-sync-config deployed successfully.
 Stack cfn-git-sync-config creation completed successfully.
 ```
 
-![alt text](image.png)
+![alt text](/images/prereq_stack.png)
 
 ### Step 2: Authorize GitHub and Enable the Connection
 Once the connection is created, go back to the Connections tab in the AWS console and authorize GitHub access.
 
-![alt text](image-1.png)
+![alt text](/images/codestar_connection.png)
 
 At times, if you had previously linked your repository to your AWS account using a CodeStar connection, deleting and recreating the connection might still cause issues when creating a new CloudFormation stack—AWS may continue referencing the "old" connection. To resolve this, you should unlink the repository using the AWS CLI and then link it again to refresh the connection. Make sure to authorize again via the console after creating a new connection.
 
@@ -203,44 +220,77 @@ aws codestar-connections delete-repository-link --repository-link-id ac01d54c-dc
 
 First we will create stack for development environment to use sync from git option
 
-![alt text](image-2.png)
+![alt text](/images/dev_stack_1.png)
 
 Provide stack name and provide a git repository
 
-![alt text](image-3.png)
+![alt text](/images/dev_stack_2.png)
 
 Chose link a git repository option for first time stack creation, fill other fields and choose role CFNGitSyncRole we created earlier
 
-![alt text](image-4.png)
+![alt text](/images/dev_stack_3.png)
 
 On next page choose CloudFormatinExecutionRole which will be used to created services mentioned in the stack template
 
-![alt text](image-5.png)
+![alt text](/images/dev_stack_4.png)
 
 Stack creation is initiated and it uses gitsync
 
-![alt text](image-6.png)
+![alt text](/images/dev_stack_5.png)
 
 Stack Deployment complete for Development Stage
 
-![alt text](image-7.png)
+![alt text](/images/dev_ec2_1.png)
 
-![alt text](image-8.png)
+![alt text](/images/dev_ec2_2.png)
 
 Similary deploy staging and production stacks
 
-![alt text](image-9.png)
+![alt text](/images/all_Stacks.png)
 
-![alt text](image-10.png)
+![alt text](/images/all_ec2.png)
 
 ### Step 4: Update the git repo to see gitsync updating the cloudformation stacks
 
 Lets update the desired capacity of autoscaling group to 2 for development environment
 
-![alt text](image-11.png)
+![alt text](/images/asg_before.png)
 
 to
 
+![alt text](/images/asg_after.png)
+
+Development stack status is changed
+
+![alt text](/images/dev_stack_updated.png)
+
+Scaling is complete for development environment
+
+![alt text](/images/dev_stack_scale_up.png)
 
 
+### Cleanup
+When you are done testing or no longer need the stacks, delete them manually via the AWS Console or CLI
+
+```sh
+aws cloudformation delete-stack --stack-name cfn-git-sync-config
+aws cloudformation delete-stack --stack-name cfn-git-development
+aws cloudformation delete-stack --stack-name cfn-git-staging
+aws cloudformation delete-stack --stack-name cfn-git-production
+```
+
+### Conclusion
+Using GitSync with AWS CloudFormation brings true GitOps to your AWS infrastructure. It simplifies deployment automation and keeps your environments in sync with Git. This approach ensures consistency, version control, and fast recovery through Git rollbacks.
+
+If you're looking to scale IaC adoption or enforce DevOps best practices, GitSync is a great way to start your GitOps journey on AWS.
+
+### References
+
+GitHub Repo: https://github.com/chinmayto/cloudformation-gitops-with-gitsync
+
+GitSync in AWS CloudFormation: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/git-sync.html
+
+How to model GitOps environments: https://codefresh.io/blog/how-to-model-your-gitops-environments-and-promote-releases-between-them/
+
+AWS CloudFormation Documentation: https://docs.aws.amazon.com/cloudformation/index.html
 
