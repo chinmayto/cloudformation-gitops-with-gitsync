@@ -45,7 +45,10 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:ListInstanceProfiles
                   - iam:ListRoles
+                  - iam:DeleteRolePolicy
+                  - iam:TagRole
                   - ssm:GetParameter
+                  - ssm:GetParameters
                   - logs:*
                   - cloudwatch:PutMetricData
                 Resource: "*"
